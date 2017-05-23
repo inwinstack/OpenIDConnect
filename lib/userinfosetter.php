@@ -17,20 +17,20 @@ class UserInfoSetter
     {
         $config = \OC::$server->getConfig();
         $userID = $userInfo->getUserId();
+        $advanceGroup = \OC::$server->getSystemConfig()->getValue("sso_advance_user_group", NULL);
+
+        $data = [
+            'region' => $userProfile->getRegion(),
+            'schoolCode' => $userProfile->getSchoolId()
+        ];
+        $config->setUserValue($userID, "settings", "regionData", json_encode($data));
 
         if ($config->getUserValue($userID, "setting", "role") != NULL && $config->getUserValue($userID, "files", "quota") == "15 GB") {
             return;
         }
 
-        $advanceGroup = \OC::$server->getSystemConfig()->getValue("sso_advance_user_group", NULL);
-        $data = [
-            'region' => $userProfile->getRegion(),
-            'schoolCode' => $userProfile->getSchoolId()
-        ];
-
         \OC_User::setDisplayName($userID, $userInfo->getDisplayName());
         $config->setUserValue($userID, "settings", "email", $userInfo->getEmail());
-        $config->setUserValue($userID, "settings", "regionData", json_encode($data));
 
         if ($userProfile->getRole() === $advanceGroup) {
             $config->setUserValue($userID, "settings", "role", $userProfile->getRole());
