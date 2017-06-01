@@ -11,8 +11,8 @@ class SingleSignOnProcessor {
     private static $requiredKeys = array("openid_login_url",
                                          "openid_requests",
                                          "openid_userinfo_url",
+                                         "sso_admin_login_port1",
                                          "sso_global_logout1",
-                                         "sso_multiple_region",
                                          "sso_one_time_password1");
 
     /**

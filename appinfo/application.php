@@ -19,7 +19,7 @@ class Application extends App {
      * Define your dependencies in here
      */
     public function __construct(array $urlParams=array()){
-        parent::__construct('singlesignon1', $urlParams);
+        parent::__construct('openidconnect', $urlParams);
 
         $container = $this->getContainer();
 

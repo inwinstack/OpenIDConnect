@@ -25,19 +25,21 @@ class UserInfoSetter
         ];
         $config->setUserValue($userID, "settings", "regionData", json_encode($data));
 
-        if ($config->getUserValue($userID, "setting", "role") != NULL && $config->getUserValue($userID, "files", "quota") == "15 GB") {
+        if ($config->getUserValue($userID, "setting", "role") != NULL && $config->getUserValue($userID, "files", "quota") == "30 GB") {
             return;
         }
 
         \OC_User::setDisplayName($userID, $userInfo->getDisplayName());
         $config->setUserValue($userID, "settings", "email", $userInfo->getEmail());
+        $config->setUserValue($userID, "files", "quota", "30 GB");
 
         if ($userProfile->getRole() === $advanceGroup) {
             $config->setUserValue($userID, "settings", "role", $userProfile->getRole());
-            $config->setUserValue($userID, "files", "quota", "15 GB");
-            if($config->getUserValue($userID, "teacher_notification", "notification", NULL) === NULL) {
-                $config->setUserValue($userID, "teacher_notification", "notification", "1");
-            }
+
+            // used to notify advance groups like teacher have 30GB quota
+            // if($config->getUserValue($userID, "teacher_notification", "notification", NULL) === NULL) {
+            //     $config->setUserValue($userID, "teacher_notification", "notification", "1");
+            // }
 
             $group = \OC::$server->getGroupManager()->get($advanceGroup);
             if(!$group) {

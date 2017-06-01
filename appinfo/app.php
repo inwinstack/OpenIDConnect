@@ -5,8 +5,8 @@
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the COPYING file.
  *
- * @author dauba <dauba.k@inwinstack.com>
- * @copyright dauba 2015
+ * @author julius <julius.j@inwinstack.com>
+ * @copyright julius 2017
  */
 
 namespace OCA\OpenIdConnect\AppInfo;
