@@ -1,7 +1,6 @@
 <?php
 
 namespace OCA\OpenIdConnect;
-include 'interface/iwebdavauthinfo.php';
 
 /**
  * Class WebDavAuthInfo

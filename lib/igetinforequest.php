@@ -1,7 +1,5 @@
 <?php
 namespace OCA\OpenIdConnect;
-include ('isinglesignonrequest.php');
-
 
 interface IGetInfoRequest extends ISingleSignOnRequest {
 

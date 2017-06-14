@@ -1,7 +1,7 @@
 <?php
 
 namespace OCA\OpenIdConnect;
-include 'interface/iauthinfo.php';
+//include 'interface/iauthinfo.php';
 
 /**
  * Class AuthInfo

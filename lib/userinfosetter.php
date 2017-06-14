@@ -45,7 +45,7 @@ class UserInfoSetter
             if(!$group) {
                 $group = \OC::$server->getGroupManager()->createGroup($advanceGroup);
             }
-            $group->addUser($user);
+            //$group->addUser($user);
         }
     }
     

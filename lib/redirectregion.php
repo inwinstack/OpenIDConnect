@@ -1,6 +1,5 @@
 <?php
 namespace OCA\OpenIdConnect;
-include 'interface/iredirectregion.php';
 
 class RedirectRegion implements IRedirectRegion{
     public static function getRegionUrl($region) {

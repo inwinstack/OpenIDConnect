@@ -1,6 +1,5 @@
 <?php
 namespace OCA\OpenIdConnect;
-include 'interface/igetinforequest.php';
 
 class GetInfo implements IGetInfoRequest {
     public static $teacherRole = array("校長",
@@ -66,47 +65,8 @@ class GetInfo implements IGetInfoRequest {
 
         $result = json_decode($result, true);
 
-        if ($statusCode != 0) {
-            if($this->setupParams["action"] == "webDavLogin") {
-                switch ($statusCode) {
-                    case 1:
-                        $errorMsg = "Missing parameter 'password'";
-                        break;
-                    case 2:
-                        $errorMsg = "Missing parameter 'userid'";
-                        break;
-                    case 3:
-                        $errorMsg = "Userid not exsit";
-                        break;
-                    case 4:
-                        $errorMsg = "Verification failed";
-                        break;
-                }
-            }
-            else {
-                switch ($statusCode) {
-                    case 1:
-                        $errorMsg = "Missing parameter 'key'";
-                        break;
-                    case 2:
-                        $errorMsg = "Error format of parameter 'key'";
-                        break;
-                    case 3:
-                        $errorMsg = "Missing parameter 'userid'";
-                        break;
-                    case 4:
-                        $errorMsg = "Userid not exsit";
-                        break;
-                    case 5:
-                        $errorMsg = "Verification failed";
-                        break;
-                }
-            }
-            $this->errorMsg = $errorMsg;
-            return false;
-        }
-
         $userInfo = $result;
+        \OCP\Util::writeLog('Duncan', 'GetInfo Name:' . $userInfo["fullname"], \OCP\Util::ERROR);
 
         $this->displayName = $userInfo["fullname"];
 

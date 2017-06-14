@@ -1,7 +1,6 @@
 <?php
 
 namespace OCA\OpenIdConnect;
-include 'interface/invalidtoken.php';
 
 class ValidToken implements ISingleSignOnRequest {
 
