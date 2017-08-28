@@ -2,6 +2,7 @@
 namespace OCA\OpenIdConnect;
 
 class GetInfo implements IGetInfoRequest {
+    const EDUINFOURL = 'https://oidc.tanet.edu.tw/moeresource/api/v1/oidc/eduinfo';
     public static $teacherRole = array("校長",
                                        "教師",
                                        "職員",
@@ -13,9 +14,7 @@ class GetInfo implements IGetInfoRequest {
     private $schoolId;
     private $groups = array();
     private $userGroup;
-    private $displayName;
     private $errorMsg;
-    private $guid;
     private $title = array();
 
     public function __construct($connection){
@@ -43,7 +42,7 @@ class GetInfo implements IGetInfoRequest {
         $serverConnection = $this->connection->getConnection();
         //$serverUrl = $this->connection->getServerUrl();
 
-        $url = 'https://oidc.tanet.edu.tw/moeresource/api/v1/oidc/profile';
+        $url = self::EDUINFOURL;
         
         curl_setopt($serverConnection, CURLOPT_URL, $url);
         curl_setopt($serverConnection, CURLOPT_SSL_VERIFYHOST, 0);
@@ -66,15 +65,11 @@ class GetInfo implements IGetInfoRequest {
         $result = json_decode($result, true);
 
         $userInfo = $result;
-        \OCP\Util::writeLog('Duncan', 'GetInfo Name:' . $userInfo["fullname"], \OCP\Util::ERROR);
 
-        $this->displayName = $userInfo["fullname"];
-
-        $this->guid = $userInfo["guid"];
-        $this->schoolId = $userInfo["titles"][0]["schoolid"];
+        $this->schoolId = $userInfo["schoolid"];
         $titleStr = $userInfo["titles"];
         foreach ($titleStr as $item) {
-            foreach ($item["title"] as $title) {
+            foreach ($item["titles"] as $title) {
                 $this->title[] = $title;
             }
         }
@@ -146,7 +141,8 @@ class GetInfo implements IGetInfoRequest {
                 return \OC::$server->getSystemConfig()->getValue("sso_advance_user_group", NUll);
             }
         }
-        return "stutent";
+        return "student";
     }
     
 }
+

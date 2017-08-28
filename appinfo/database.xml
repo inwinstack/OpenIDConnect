@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+	<name>*dbname*</name>
+	<create>true</create>
+	<overwrite>false</overwrite>
+	<charset>utf8</charset>
+	<table>
+		<name>*dbprefix*openid_connect_user_info</name>
+		<declaration>
+			<field>
+				<name>sub</name>
+				<type>text</type>
+				<notnull>true</notnull>
+				<length>128</length>
+			</field>
+			<field>
+				<name>preferred_username</name>
+				<type>text</type>
+				<notnull>true</notnull>
+				<length>128</length>
+			</field>
+			<field>
+				<name>old_preferred_username</name>
+				<type>text</type>
+				<default>null</default>
+				<length>128</length>
+			</field>
+			<field>
+				<name>match_oc_account</name>
+				<type>text</type>
+				<default>null</default>
+				<length>128</length>
+			</field>
+			<field>
+				<name>openid_connect_user</name>
+				<type>integer</type>
+				<length>1</length>
+			</field>
+			<index>
+				<name>open_id</name>
+				<field>
+					<name>sub</name>
+				</field>
+			</index>
+		</declaration>
+	</table>
+</database>
+

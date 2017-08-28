@@ -40,7 +40,6 @@ class UserInfoSetter
             // if($config->getUserValue($userID, "teacher_notification", "notification", NULL) === NULL) {
             //     $config->setUserValue($userID, "teacher_notification", "notification", "1");
             // }
-            $config->setUserValue($userID, "files", "quota", "20 GB");
             $group = \OC::$server->getGroupManager()->get($advanceGroup);
             if(!$group) {
                 $group = \OC::$server->getGroupManager()->createGroup($advanceGroup);

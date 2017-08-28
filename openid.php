@@ -1,18 +1,96 @@
 <?php
+require_once "config/config.php";
+
+function getOpenIdConf(){
+   $getConfUrl = 'https://oidc.tanet.edu.tw/.well-known/openid-configuration';
+   $ch = curl_init();
+   curl_setopt($ch, CURLOPT_URL,$getConfUrl);
+   curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+   $result = curl_exec($ch);
+   $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+   curl_close($ch);
+   if ($httpcode == 200){
+       return json_decode($result,true);
+   }
+   else{
+       return false;
+   }
+}
+
+$redirectHost = $_SERVER['SERVER_NAME'];
+
+function getPreferredUserName($redirectHost,$idToken,$OpenidConf){
+
+    $data  = array('id_token' => $idToken, 'jwks_uri'=>$OpenidConf['jwks_uri']);
+    $ch = curl_init();
+    $url = "https://". $redirectHost ."/ocs/v1.php/apps/openidconnect/decryptidtoken?format=json";
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+    //curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    //        'Content-type: application/x-www-form-urlencoded'
+    //));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    $result = curl_exec($ch);
+    $result = json_decode($result,true);
+    curl_close($ch);
+
+    if ($result['ocs']['meta']['statuscode'] == 100){
+        if ($result['ocs']['data']['result'] !== false){
+            $decrptIdToken = $result['ocs']['data']['result'];
+            return $decrptIdToken['preferred_username'];
+        }
+    }
+    return false;
+
+}
+
+function getRegionHost($redirectHost,$accessToken){
+    
+    $data  = array('access_token' => $accessToken);
+    $ch = curl_init();
+    $url = "https://". $redirectHost ."/ocs/v1.php/apps/openidconnect/getredircthost?format=json";
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    $result = curl_exec($ch);
+    $result = json_decode($result,true);
+    curl_close($ch);
+    
+    if ($result['ocs']['meta']['statuscode'] == 100){
+        if ($result['ocs']['data']['result'] !== false){
+            $redircetHost = $result['ocs']['data']['result'];
+            return $redircetHost;
+        }
+    }
+    return false;
+    
+}
+
 
 $parts = parse_url($_SERVER['QUERY_STRING']);
 parse_str($parts['path'], $query);
 if (!isset($query['code'])) {
-   header("Location: https://oidc.tanet.edu.tw/oidc/v1/azp?response_type=code&client_id=9f0dba9a636c42a3a074128804675556&redirect_uri=https://moe1.owncloud.com/openid.php&scope=openid+email+profile+edudata&state=mdu09QmEXXYhEQpVrIiI2sNUqbIXgqphPqzpRgOArww&nonce=_pFWU8VbN43yfGlOGgutRZODR6iCp_10LN8aa4IMy-s"); 
+
+   //https://oidc.tanet.edu.tw/oidc/v1/azp
+   $authEndpoint = $OpenidConf['authorization_endpoint'];
+   header("Location: $authEndpoint?response_type=code&client_id=9f0dba9a636c42a3a074128804675556&redirect_uri=https://$redirectHost/openid.php&scope=openid+email+profile+eduinfo+openid2&state=mdu09QmEXXYhEQpVrIiI2sNUqbIXgqphPqzpRgOArww&nonce=_pFWU8VbN43yfGlOGgutRZODR6iCp_10LN8aa4IMy-s");
+
 }
-
 else {
-    $data = 'grant_type=authorization_code&code=' . $query['code'] . '&redirect_uri=https://moe1.owncloud.com/openid.php';
+    $data = 'grant_type=authorization_code&code=' . $query['code'] . "&redirect_uri=https://moe1.owncloud.com/openid.php";
 
+    //'https://oidc.tanet.edu.tw/oidc/v1/token'
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL,'https://oidc.tanet.edu.tw/oidc/v1/token');
+    curl_setopt($ch, CURLOPT_URL,$OpenidConf['token_endpoint']);
     curl_setopt($ch, CURLOPT_POST, true); 
-    //curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
     curl_setopt($ch, CURLOPT_USERPWD, "9f0dba9a636c42a3a074128804675556:85f30e32169afed8e837170f852e07f1e6cb3ac36b0efb802cf92d6a1cdbb5d6");
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
@@ -28,7 +106,7 @@ else {
         $limit++;
         $result = curl_exec($ch);
     }
-
+    curl_close($ch);
     $result = json_decode($result, true);
 
     $ip = $_SERVER["REMOTE_ADDR"];
@@ -37,11 +115,33 @@ else {
 
     if($result['access_token'] != null) {
         $params['access_token'] = $result['access_token'];
-        $params["userip"] = $ip;
-        curl_close($ch);
-
-        header('Location: https://moe1.owncloud.com/?'. http_build_query($params));
-        exit();
+        $OpenidConf = getOpenIdConf();
+        if(!$OpenidConf){
+            $msg = "無法取得OpenID Connect屬性檔!";
+        }
+        else{
+            $preferredUsername = getPreferredUserName($redirectHost,$result['id_token'],$OpenidConf);
+            
+            if (!$preferredUsername){
+                $msg = "ID_TOKEN驗證失敗!";
+            }
+            else{
+                
+                $params['preferred_username'] = $preferredUsername;
+                //$params['preferred_username'] = 'newmarlon';
+            
+                $newRedirectHost = getRegionHost($redirectHost,$result['access_token']);
+            
+                if (!$newRedirectHost){
+                    $msg = "ACCESS_TOKEN驗證失敗!";
+                }
+                else{
+                    $params["userip"] = $ip;
+                    header("Location: https://$newRedirectHost/index.php?". http_build_query($params));
+                    exit();
+                }
+            }
+        }
     }
     else {
         $msg = "無法取得 OpenID connect 合法授權資訊";
@@ -135,3 +235,4 @@ else {
     </footer>
 </body>
 </html>
+
