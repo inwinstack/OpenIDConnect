@@ -34,9 +34,11 @@
 			<field>
 				<name>openid_connect_user</name>
 				<type>integer</type>
-				<length>1</length>
+				<length>20</length>
 			</field>
 			<index>
+				<primary>true</primary>
+				<unique>true</unique>
 				<name>open_id</name>
 				<field>
 					<name>sub</name>

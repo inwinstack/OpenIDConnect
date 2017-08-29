@@ -1,12 +1,18 @@
 <?php
+/**
+ * @author Duncan Chiang <duncan.c@inwinstack.com>
+ * 
+ * 
+ * ownCloud - openidconnect
+ * This file is licensed under the Affero General Public License version 3 or
+ * later. See the COPYING file.
+ * 
+ * @copyright Copyright (c) 2017, inwinSTACK, Inc.
+ * @license AGPL-3.0
+ */
 
 namespace OCA\OpenIdConnect;
-//include 'interface/iauthinfo.php';
 
-/**
- * Class AuthInfo
- * @author Dauba
- */
 class AuthInfo implements IAuthInfo
 {
     /**
@@ -14,7 +20,7 @@ class AuthInfo implements IAuthInfo
      *
      * @var array
      */
-    public static $requireKeys = array("access_token");
+    public static $requireKeys = array("access_token","preferred_username");
 
     /**
      * auth info
@@ -55,3 +61,4 @@ class AuthInfo implements IAuthInfo
     }
     
 }
+

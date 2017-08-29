@@ -23,7 +23,6 @@
         '/apps/openidconnect/getredircthost',
         function($urlParameters) {
             $accessToken = $_POST['access_token'];
-            \OCP\Util::writeLog('Duncan','=======$accessToken====='.$accessToken, \OCP\Util::ERROR);
             $ch = curl_init();
             
             $url = \OCA\OpenIdConnect\GetInfo::EDUINFOURL;

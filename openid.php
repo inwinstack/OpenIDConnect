@@ -73,65 +73,61 @@ function getRegionHost($redirectHost,$accessToken){
     return false;
     
 }
-
-
-$parts = parse_url($_SERVER['QUERY_STRING']);
-parse_str($parts['path'], $query);
-if (!isset($query['code'])) {
-
-   //https://oidc.tanet.edu.tw/oidc/v1/azp
-   $authEndpoint = $OpenidConf['authorization_endpoint'];
-   header("Location: $authEndpoint?response_type=code&client_id=9f0dba9a636c42a3a074128804675556&redirect_uri=https://$redirectHost/openid.php&scope=openid+email+profile+eduinfo+openid2&state=mdu09QmEXXYhEQpVrIiI2sNUqbIXgqphPqzpRgOArww&nonce=_pFWU8VbN43yfGlOGgutRZODR6iCp_10LN8aa4IMy-s");
-
+$OpenidConf = getOpenIdConf();
+if(!$OpenidConf){
+    $msg = "無法取得OpenID Connect屬性檔!";
 }
-else {
-    $data = 'grant_type=authorization_code&code=' . $query['code'] . "&redirect_uri=https://moe1.owncloud.com/openid.php";
-
-    //'https://oidc.tanet.edu.tw/oidc/v1/token'
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL,$OpenidConf['token_endpoint']);
-    curl_setopt($ch, CURLOPT_POST, true); 
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
-    curl_setopt($ch, CURLOPT_USERPWD, "9f0dba9a636c42a3a074128804675556:85f30e32169afed8e837170f852e07f1e6cb3ac36b0efb802cf92d6a1cdbb5d6");
-    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Content-type: application/x-www-form-urlencoded'
-    ));
-    $result = curl_exec($ch);
+else{
+    $parts = parse_url($_SERVER['QUERY_STRING']);
+    parse_str($parts['path'], $query);
+    if (!isset($query['code'])) {
     
-    $pageError = "<html><head><title>Error</title></head><body>Internal Server Error</body></html>";
-    $limit = 0;
-    while((curl_errno($ch) == 28 || $result == $pageError ) && $limit < 4){
-        $limit++;
-        $result = curl_exec($ch);
+        //https://oidc.tanet.edu.tw/oidc/v1/azp
+        $authEndpoint = $OpenidConf['authorization_endpoint'];
+        header("Location: $authEndpoint?response_type=code&client_id=9f0dba9a636c42a3a074128804675556&redirect_uri=https://$redirectHost/openid.php&scope=openid+email+profile+eduinfo+openid2&state=mdu09QmEXXYhEQpVrIiI2sNUqbIXgqphPqzpRgOArww&nonce=_pFWU8VbN43yfGlOGgutRZODR6iCp_10LN8aa4IMy-s");
+    
     }
-    curl_close($ch);
-    $result = json_decode($result, true);
-
-    $ip = $_SERVER["REMOTE_ADDR"];
-
-    $params['asus'] = false;
-
-    if($result['access_token'] != null) {
-        $params['access_token'] = $result['access_token'];
-        $OpenidConf = getOpenIdConf();
-        if(!$OpenidConf){
-            $msg = "無法取得OpenID Connect屬性檔!";
+    else {
+        $data = 'grant_type=authorization_code&code=' . $query['code'] . "&redirect_uri=https://moe1.owncloud.com/openid.php";
+    
+        //'https://oidc.tanet.edu.tw/oidc/v1/token'
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL,$OpenidConf['token_endpoint']);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($ch, CURLOPT_USERPWD, "9f0dba9a636c42a3a074128804675556:85f30e32169afed8e837170f852e07f1e6cb3ac36b0efb802cf92d6a1cdbb5d6");
+        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Content-type: application/x-www-form-urlencoded'
+        ));
+        $result = curl_exec($ch);
+    
+        $pageError = "<html><head><title>Error</title></head><body>Internal Server Error</body></html>";
+        $limit = 0;
+        while((curl_errno($ch) == 28 || $result == $pageError ) && $limit < 4){
+            $limit++;
+            $result = curl_exec($ch);
         }
-        else{
+        curl_close($ch);
+        $result = json_decode($result, true);
+    
+        $ip = $_SERVER["REMOTE_ADDR"];
+    
+        $params['asus'] = false;
+    
+        if($result['access_token'] != null) {
+            $params['access_token'] = $result['access_token'];
             $preferredUsername = getPreferredUserName($redirectHost,$result['id_token'],$OpenidConf);
-            
             if (!$preferredUsername){
                 $msg = "ID_TOKEN驗證失敗!";
             }
             else{
-                
                 $params['preferred_username'] = $preferredUsername;
                 //$params['preferred_username'] = 'newmarlon';
-            
+    
                 $newRedirectHost = getRegionHost($redirectHost,$result['access_token']);
-            
+    
                 if (!$newRedirectHost){
                     $msg = "ACCESS_TOKEN驗證失敗!";
                 }
@@ -142,12 +138,11 @@ else {
                 }
             }
         }
-    }
-    else {
-        $msg = "無法取得 OpenID connect 合法授權資訊";
+        else {
+            $msg = "無法取得 OpenID connect 合法授權資訊";
+        }
     }
 }
-
 ?>
 
 <html>

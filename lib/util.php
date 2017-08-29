@@ -132,7 +132,8 @@ class Util {
                 SET
                 `old_preferred_username` =
                 CASE
-	               WHEN `sub` = ? THEN `preferred_username`
+	               WHEN (`sub` = ? AND `preferred_username` != 'false') THEN `preferred_username`
+                   WHEN preferred_username` = ? THEN `preferred_username`
 	               ELSE `old_preferred_username`
                 END,
                 `preferred_username`=
@@ -145,7 +146,7 @@ class Util {
                 ";
         
         $prepare = \OC_DB::prepare($sql);
-        $result = $prepare->execute(array($userID,$userID,$preferredUserName,$userID,$preferredUserName,
+        $result = $prepare->execute(array($userID,$preferredUserName,$userID,$preferredUserName,$userID,$preferredUserName,
                 $preferredUserName,$userID,$preferredUserName));
     }
     

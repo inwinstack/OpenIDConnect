@@ -1,4 +1,5 @@
 <?php
+
 namespace OCA\OpenIdConnect;
 
 class UserInfo implements IUserInfoRequest {
@@ -14,6 +15,7 @@ class UserInfo implements IUserInfoRequest {
     private $groups = array();
     private $userGroup;
     private $displayName;
+    private $preferredName ;
     private $errorMsg;
     private $sid;
     private $title = array();
@@ -44,8 +46,6 @@ class UserInfo implements IUserInfoRequest {
         $serverUrl = $this->connection->getServerUrl();
 
         $url = $serverUrl . 'userinfo';
-
-        \OCP\Util::writeLog('Duncan', $url, \OCP\Util::ERROR);
         
         curl_setopt($serverConnection, CURLOPT_URL, $url);
         curl_setopt($serverConnection, CURLOPT_SSL_VERIFYHOST, 0);
@@ -63,61 +63,14 @@ class UserInfo implements IUserInfoRequest {
             $limit++;
             $result = curl_exec($serverConnection);
         }
-        //
         
         $result = json_decode($result, true);
 
-
-        // $statusCode = (int)$result["retcode"];
-
-	    // \OCP\Util::writeLog('Duncan', $result, \OCP\Util::ERROR);
-	
-        // // need to fit to real error data
-        // if ($statusCode != 0) {
-        //     if($this->setupParams["action"] == "webDavLogin") {
-        //         switch ($statusCode) {
-        //             case 1:
-        //                 $errorMsg = "Missing parameter 'password'";
-        //                 break;
-        //             case 2:
-        //                 $errorMsg = "Missing parameter 'userid'";
-        //                 break;
-        //             case 3:
-        //                 $errorMsg = "Userid not exsit";
-        //                 break;
-        //             case 4:
-        //                 $errorMsg = "Verification failed";
-        //                 break;
-        //         }
-        //     }
-        //     else {
-        //         switch ($statusCode) {
-        //             case 1:
-        //                 $errorMsg = "Missing parameter 'key'";
-        //                 break;
-        //             case 2:
-        //                 $errorMsg = "Error format of parameter 'key'";
-        //                 break;
-        //             case 3:
-        //                 $errorMsg = "Missing parameter 'userid'";
-        //                 break;
-        //             case 4:
-        //                 $errorMsg = "Userid not exsit";
-        //                 break;
-        //             case 5:
-        //                 $errorMsg = "Verification failed";
-        //                 break;
-        //         }
-        //     }
-        //     $this->errorMsg = $errorMsg;
-        //     return false;
-        // }
-
         $userInfo = $result;
-        \OCP\Util::writeLog('Duncan', 'UserInfo Email:' . $userInfo["email"], \OCP\Util::ERROR);
 
-        $this->userId = $result["email"];
-        $this->email = $result["email"];
+        $this->userId = $result["sub"];
+        $this->preferredName = $data['preferred_username'];
+        $this->email = $data['preferred_username'].'@mail.edu.tw';
         $this->displayName = $result["name"];
         $this->token = $data['access_token'];
 
@@ -126,6 +79,10 @@ class UserInfo implements IUserInfoRequest {
 
     public function getErrorMsg() {
         return $this->errorMsg;
+    }
+    
+    public function getPreferredName() {
+        return $this->preferredName;
     }
 
     public function getUserId() {
@@ -165,3 +122,5 @@ class UserInfo implements IUserInfoRequest {
         return $this->errorMsg ? true : false;
     }
 }
+
+

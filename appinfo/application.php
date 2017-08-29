@@ -1,19 +1,21 @@
 <?php
 /**
- * ownCloud - singlesignon1
- *
+ * @author Duncan Chiang <duncan.c@inwinstack.com>
+ * 
+ * 
+ * ownCloud - openidconnect
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the COPYING file.
- *
- * @author Dino Peng <dino.p@inwinstack.com>
- * @copyright Dino Peng 2016
+ * 
+ * @copyright Copyright (c) 2017, inwinSTACK, Inc.
+ * @license AGPL-3.0
  */
 
-namespace OCA\OpenIdConnect\AppInfo\Application;
+namespace OCA\OpenIdConnect\AppInfo;
 
 use OCP\AppFramework\App;
-use OCA\OpenIdConnect\Middleware\SSOMiddleware; 
 
+use OCA\OpenIdConnect\UserHooks;
 class Application extends App {
     /**
      * Define your dependencies in here
@@ -23,17 +25,12 @@ class Application extends App {
 
         $container = $this->getContainer();
 
-        /**
-         * Middleware
-         */
-        $container->registerService('SSOMiddleware', function($c) {
-			return new SSOMiddleware(
-				$c['Request'],
-				$c['ControllerMethodReflector'],
-				$c['OCP\IUserSession']
-			);
-		});
-        // executed in the order that it is registered
-        $container->registerMiddleware('SSOMiddleware');
+        $container->registerService('UserHooks', function($c) {
+            return new UserHooks(
+                $c->query('ServerContainer')->getUserSession(),
+                $c->query('ServerContainer')->getRootFolder()
+            );
+        });
     }
 }
+

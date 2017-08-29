@@ -1,4 +1,16 @@
 <?php
+/**
+ * @author Duncan Chiang <duncan.c@inwinstack.com>
+ *
+ *
+ * ownCloud - openidconnect
+ * This file is licensed under the Affero General Public License version 3 or
+ * later. See the COPYING file.
+ *
+ * @copyright Copyright (c) 2017, inwinSTACK, Inc.
+ * @license AGPL-3.0
+ */
+
 namespace OCA\OpenIdConnect;
 
 use Exception;
@@ -178,15 +190,38 @@ class SingleSignOnProcessor {
         // if($this->config->getValue("sso_multiple_region")) {
         //     Util::redirectRegion($userInfo, $this->config->getValue("sso_regions"), $this->config->getValue("sso_owncloud_url"));
         // }
-
+        
+        $getUserInfoBySub = Util::getOpenIDInfoInDBBySub($userInfo->getUserId());
+        //check user by sub
         if(!\OC_User::userExists($userInfo->getUserId())) {
-            Util::firstLogin($userInfo, $authInfo, $userProfile);
+            
+            if (empty($getUserInfoBySub)){
+                
+                if (!\OC_User::userExists($userInfo->getEmail())){
+                    Util::firstLogin($userInfo, $authInfo, $userProfile);
+                }
+                
+                // not exist sub but exist mail.edu.tw account
+                else{
+                    Util::saveOpenIDInfoToDB($userInfo);
+                    Util::changeMailAcountUser($userInfo->getEmail(),$authInfo);
+                }
+            }
+            
+            else{
+                Util::checkPreferredNameChanged($userInfo);
+                $matchMailAccount = $getUserInfoBySub['match_oc_account'];
+                Util::changeMailAcountUser($matchMailAccount,$authInfo);
+            }
+
             if($this->request->getHeader("ORIGIN")) {
                 return;
             }
             Util::redirect($this->defaultPageUrl);
         }
+        
         else {
+            Util::checkPreferredNameChanged($userInfo,true);
             Util::login($userInfo, $authInfo, $userProfile);
         
             if($this->request->getHeader("ORIGIN")) {
@@ -258,3 +293,5 @@ class SingleSignOnProcessor {
         return $this->token;
     }
 }
+
+
