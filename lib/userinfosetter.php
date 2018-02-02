@@ -19,22 +19,30 @@ class UserInfoSetter
         $userID = $userInfo->getUserId();
         $advanceGroup = \OC::$server->getSystemConfig()->getValue("sso_advance_user_group", NULL);
 
-        $data = [
-            'region' => $userProfile->getRegion(),
-            'schoolCode' => $userProfile->getSchoolId()
-        ];
-        $config->setUserValue($userID, "settings", "regionData", json_encode($data));
+        $regionData = \OC::$server->getConfig()->getUserValue($userID, "settings", "regionData",false);
+        if (!$regionData ||
+            $regionDataDecoded['region'] !== $userInfo->getRegion() ||
+            $regionDataDecoded['schoolCode'] !== $userInfo->getSchoolId()
+            ){
+                $data = ['region' => $userInfo->getRegion(),
+                    'schoolCode' => $userInfo->getSchoolId(),
+                ];
+                $config->setUserValue($userID, "settings", "regionData", json_encode($data));
+        }
 
-        if ($config->getUserValue($userID, "setting", "role") != NULL && $config->getUserValue($userID, "files", "quota") == "30 GB") {
-            return;
+        $savedRole = $config->getUserValue($userID, "settings", "role",NULL);
+        if ($savedRole !== $userInfo->getRole()) {
+            $config->setUserValue($userID, "settings", "role", $userInfo->getRole());
+        }
+        
+        $savedEmail = $config->getUserValue($userID, "settings", "email",NULL);
+        if ($savedEmail !== $userInfo->getEmail()) {
+            $config->setUserValue($userID, "settings", "email", $userInfo->getEmail());
         }
 
         \OC_User::setDisplayName($userID, $userInfo->getDisplayName());
-        $config->setUserValue($userID, "settings", "email", $userInfo->getEmail());
-        //$config->setUserValue($userID, "files", "quota", "30 GB");
 
         if ($userProfile->getRole() === $advanceGroup) {
-            $config->setUserValue($userID, "settings", "role", $userProfile->getRole());
 
             // used to notify advance groups like teacher have 30GB quota
             // if($config->getUserValue($userID, "teacher_notification", "notification", NULL) === NULL) {
