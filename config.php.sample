@@ -27,16 +27,24 @@ $CONFIG = array (
   'theme' => 'MOE',
   'storage_url' => 'https://storage.edu.tw',
   'ldapIgnoreN' => false,
-  'sso_login_url' => 'https://moe1.owncloud.com/login.php',
-  'openid_login_url' => 'https://moe1.owncloud.com/openid.php',
-  'sso_return_url_key' => '?path=',
-  'sso_requests' => 
+  
+  #needed for openidconnect app
+  
+  'openid_userinfo_url' => 'https://oidc.tanet.edu.tw/oidc/v1/',
+  'openid_url_token_key1' => 'token',
+  'openid_requests' => 
   array (
-    3 => '\\OCA\\SingleSignOn\\GetInfo',
+    0 => '\\OCA\\OpenIdConnect\\GetInfo',
+    1 => '\\OCA\\OpenIdConnect\\UserInfo',
   ),
-  'sso_portal_url' => 'http://mail.edu.tw/cgi-bin/storage_api',
-  'sso_global_logout' => false,
-  'sso_one_time_password' => true,
+  'openid_login_url' => 'https://moe1.owncloud.com/openid.php',
+  'sso_admin_login_port1' => 80,
+  'sso_global_logout1' => true,
+  'sso_one_time_password1' => true,
+  'sso_owncloud_url' => 
+  array (
+    'north' => 'moe1.owncloud.com',
+  ),
   'sso_regions' => 
   array (
     1 => 'north',
@@ -91,13 +99,22 @@ $CONFIG = array (
     71 => 'north',
     72 => 'north',
   ),
-  'sso_owncloud_url' => 
+  'sso_admin_login_uri1' => '/admin',
+  'sso_login_url' => 'http://mail.edu.tw/cgi-bin/go_storage',
+  'sso_return_url_key' => '?path=',
+  'sso_requests' => 
   array (
-    'north' => 'moe1.owncloud.com',
+    3 => '\\OCA\\SingleSignOn\\GetInfo',
   ),
+  'sso_portal_url' => 'https://mail.edu.tw/cgi-bin/storage_api',
+  'sso_global_logout' => false,
+  'sso_one_time_password' => true,
   'sso_admin_login_uri' => '/admin',
   'sso_admin_login_port' => 443,
   'sso_multiple_region' => true,
+  
+  
+  
   'mail_smtpmode' => 'php',
   //'sharing_group_mode' => 'Friend_mode',
   'enabledPreviewProviders' => 
@@ -114,32 +131,7 @@ $CONFIG = array (
     'delete' => false,
     'reshare' => false,
   ),
-  'sso_advance_user_group' => 'teacher',
-  'sso_login_url1' => 'https://moe1.owncloud.com/login.php',
-  'openid_login_url' => 'https://moe1.owncloud.com/openid.php',
-  'sso_cookie_token_key1' => 'token',
-  'sso_url_token_key1' => 'token1',
-  'openid_url_token_key1' => 'token',
-  'sso_auth_method1' => 'param',
-  'sso_return_url_key1' => '?returnUrl=',
-  'sso_requests1' => 
-  array (
-    0 => '\\OCA\\SingleSignOn1\\InvalidToken',
-    1 => '\\OCA\\SingleSignOn1\\ValidToken',
-    2 => '\\OCA\\SingleSignOn1\\GetToken1',
-    3 => '\\OCA\\SingleSignOn1\\GetInfo',
-  ),
-  'openid_requests' => 
-  array (
-    0 => '\\OCA\\OpenIdConnect\\GetInfo',
-    1 => '\\OCA\\OpenIdConnect\\UserInfo',
-  ),
-  'sso_portal_url1' => 'http://sso.cloud.edu.tw/ORG/service/SSOServiceX?wsdl',
-  'openid_userinfo_url' => 'https://oidc.tanet.edu.tw/oidc/v1/',
-  'sso_global_logout1' => true,
-  'sso_admin_login_uri1' => '/admin',
-  'sso_admin_login_port1' => 80,
-  'sso_one_time_password1' => true,
+  
   'files_version_cleaner_default_version_number' => 2,
   'files_version_cleaner_max_version_number' => 10,
   'files_version_cleaner_default_historic_version_number' => 2,
