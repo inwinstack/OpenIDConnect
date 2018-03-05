@@ -57,8 +57,7 @@ class Util {
         }
         
         self::saveOpenIDInfoToDB($userInfo,$isOpenIDUser=true);
-        $config = \OC::$server->getConfig();
-        $config->setUserValue($userID, "login", "firstLogin", time());
+
         self::wirteAuthInfoToSession($authInfo);
         return \OC_User::login($userID, $password);
     }
