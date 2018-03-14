@@ -203,12 +203,15 @@ class SingleSignOnProcessor {
                 
                 // not exist sub but exist mail.edu.tw account
                 else{
+                    self::checkUserIsEnabled($userInfo->getEmail());
+
                     Util::saveOpenIDInfoToDB($userInfo);
                     Util::changeMailAcountUser($userInfo->getEmail(),$authInfo);
                 }
             }
             
             else{
+                self::checkKeyExist($userInfo->getUserId());
                 Util::checkPreferredNameChanged($userInfo);
                 $matchMailAccount = $getUserInfoBySub['match_oc_account'];
                 Util::changeMailAcountUser($matchMailAccount,$authInfo);
@@ -229,6 +232,17 @@ class SingleSignOnProcessor {
             }
 
             Util::redirect($this->defaultPageUrl);
+        }
+    }
+
+    private function checkUserIsEnabled($userId){
+        if(!\OC_User::isEnabled($userId) && \OC_User::userExists($userId)){
+            header('HTTP/1.1 401 Service Temporarily Unavailable');
+            header('Status: 401 Service Temporarily Unavailable');
+            
+            $template = new \OC_Template('user_status_validator', 'userdisable', 'guest');
+            $template->printPage();
+            die();
         }
     }
 
